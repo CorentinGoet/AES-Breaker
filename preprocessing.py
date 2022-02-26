@@ -38,10 +38,10 @@ def hex2dec(hex_str):
 if __name__ == '__main__':
 
     # Parameters
-    # nb_traces = 20000   # Nombre de mesures réalisées
-    nb_traces = 10      # example version
+    nb_traces = 20000   # Nombre de mesures réalisées
+    # nb_traces = 10      # example version
     nb_points = 4000    # Nombre de points par traces
-    data_directory = "data_example"
+    data_directory = "data"
     output_directory = "processed_data"
 
     # Processing
@@ -57,6 +57,9 @@ if __name__ == '__main__':
         cto_list.append(info['cto'])
         traces_array[i, :] = np.loadtxt(data_directory + '/' + files[i],
                                         delimiter=',')
+        if i % 100 == 0:
+            # gives feedback during execution
+            print("trace {} processed".format(i))
 
     # Convert to decimal values
     key_dec = np.zeros((nb_traces, 16))
