@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     # Parameters
     nb_traces = 20000   # Nombre de mesures réalisées
-    # nb_traces = 10      # example version
+    # nb_traces = 10    # example version
     nb_points = 4000    # Nombre de points par traces
     data_directory = "data"
     output_directory = "processed_data"
