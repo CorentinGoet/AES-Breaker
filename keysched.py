@@ -40,5 +40,7 @@ def keysched(key):
 
 if __name__ == '__main__':
     keys = np.load('processed_data/key_dec.npy')
+    print(keys[0])
     key = np.reshape(keys[0], (4, 4))
+    print(key)
     np.save('processed_data/keysched.npy', keysched(key))
