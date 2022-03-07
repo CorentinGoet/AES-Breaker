@@ -62,9 +62,9 @@ if __name__ == '__main__':
             print("trace {} processed".format(i))
 
     # Convert to decimal values
-    key_dec = np.zeros((nb_traces, 16))
-    pti_dec = np.zeros((nb_traces, 16))
-    cto_dec = np.zeros((nb_traces, 16))
+    key_dec = np.zeros((nb_traces, 16), dtype=np.int8)
+    pti_dec = np.zeros((nb_traces, 16), dtype=np.int8)
+    cto_dec = np.zeros((nb_traces, 16), dtype=np.int8)
     for i in range(nb_traces):
         key_dec[i, :] = hex2dec(key_list[i])
         pti_dec[i, :] = hex2dec(pti_list[i])
