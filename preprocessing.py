@@ -70,7 +70,7 @@ if __name__ == '__main__':
         pti_dec[i, :] = hex2dec(pti_list[i])
         cto_dec[i, :] = hex2dec(cto_list[i])
 
-    np.save(output_directory + '/' + 'key_dec.npy', key_dec)
+    np.save(output_directory + '/' + 'key.npy', key_dec)
     np.save(output_directory + '/' + 'pti_dec.npy', pti_dec)
     np.save(output_directory + '/' + 'cto_dec.npy', cto_dec)
     np.save(output_directory + '/' + 'L.npy', traces_array)
