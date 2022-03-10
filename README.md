@@ -18,3 +18,9 @@ by Corentin Goetghebeur and Chris Arridi between 28/02/2022 and 13/03/2022.
 
 Pour plus de détails sur ce projet, voir rapport.md.
 
+## Utilisation
+Pour lancer le programme, exécuter le fichier `main.py`:
+```shell
+python3 main.py
+```
+
