@@ -89,10 +89,14 @@ if __name__ == '__main__':
                 state_predict[key_i, trace, :] = aes.invShiftRow(state_predict[key_i, trace, :])
                 # SubByte inverse
                 state_predict[key_i, trace, :] = aes.invSubByte(state_predict[key_i, trace, :])
-            if trace % 100 == 0:
+            if trace % 100 == 0:    # pour observer le progrès du calcul
                 print("Prédiction terminée pour la trace n° {} - temps écoulé : {}".format(trace, round(time.time() - t0, 2)))
 
         print("Prédiction terminée - temps total écoulé: ", time.time() - t0)
         np.save('processed_data/state_predict.npy', state_predict)
 
     print(state_predict)
+
+    # Calcul des poids de Hamming
+
+
