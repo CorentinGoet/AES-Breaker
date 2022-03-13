@@ -74,12 +74,14 @@ if __name__ == '__main__':
     # Répétition de la matrice de cypher
     try:
         state_predict = np.load('processed_data/state_predict.npy')
+        print("matrice de prédictions chargée")
     except FileNotFoundError:
         state_predict = np.zeros((key_hypotheses.size, cto.shape[0], cto.shape[1]), dtype=np.int32)
         for i in range(256):
             state_predict[i, :, :] = cto
 
         print("Début du calcul de l'état initial")
+        print("SOYEZ PATIENT CETTE ETAPE PEUT PRENDRE PLUS DE 20 MINUTES")
         t0 = time.time()
         for trace in range(cto.shape[0]):
             for key_i in key_hypotheses:
@@ -95,8 +97,26 @@ if __name__ == '__main__':
         print("Prédiction terminée - temps total écoulé: ", time.time() - t0)
         np.save('processed_data/state_predict.npy', state_predict)
 
-    print(state_predict)
+    #print(state_predict)
 
     # Calcul des poids de Hamming
+    try:
+        hamming_weight = np.load('processed_data/hamming_weight.npy')
+        print("Matrice de poids de Hamming chargée !")
+    except FileNotFoundError:
+        t0 = time.time()
+        hamming_weight = np.zeros(state_predict.shape, dtype=np.int32)
+        for trace in range(state_predict.shape[1]):
+            for key_i in range(state_predict.shape[0]):
+                for i in range(state_predict.shape[2]):
+                    hamming_weight[key_i, trace, i] = hammingWeight(state_predict[key_i, trace, i])
+            if trace % 100 == 0:    # pour observer le progrès du calcul
+                print("Calcul du poids de Hamming terminé pour la trace n° {} "
+                      "- temps écoulé : {}".format(trace, round(time.time() - t0, 2)))
+        np.save('processed_data/hamming_weight.npy', hamming_weight)
+        print("matrice de poids de Hamming calculée et enregistrée !")
+
+
+
 
 
