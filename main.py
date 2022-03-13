@@ -7,7 +7,7 @@ Main python file of the projet.
 import numpy as np
 import matplotlib.pyplot as plt
 from AES_utils import AESUtils
-
+import time
 
 def hammingWeight(byte: int):
     """
@@ -37,45 +37,62 @@ if __name__ == '__main__':
 
     # Affichage des premières traces
     plt.figure()
-    plt.title("Fuites électromagnétiques ({} premières traces)".format(nb_traces))
-    plt.xlabel("échantillons")
-    plt.ylabel("amplitude")
+    plt.title("Courbes de consommation ({} premières traces)".format(nb_traces))
+    plt.xlabel("temps")
+    plt.ylabel("fuites électromagnétiques")
     for i in range(nb_traces):
         plt.plot(L[i])
 
     # Affichage de la consommation moyenne
     avg = np.mean(L, 0)
     plt.figure()
-    plt.title("Fuites électromagnétiques moyennes")
-    plt.xlabel("échantillons")
-    plt.ylabel("amplitude")
+    plt.title("Courbe de consommation moyenne")
+    plt.xlabel("temps")
+    plt.ylabel("fuites électromagnétiques")
     plt.plot(avg)
 
     plt.show()
 
+    # Affichage de la clé attendue
+    print("Clé attendue en sortie de l'algorithme d'inversion: ")
+    key_4x4 = np.reshape(np.array(key[0], dtype=np.int32), (4, 4))
+    print(key_4x4)
+
     # Isolation du dernier Round
     n = L.shape[0]
     ind_start = 3050
-    ind_end = 3250
+    ind_end = 3300
     last_round = np.zeros((n, ind_end - ind_start))
     for i in range(n):
         last_round[i] = L[i, ind_start:ind_end]
 
-    # Attaque
-    SBox = np.array([[99, 124, 119, 123, 242, 107, 111, 197, 48, 1, 103, 43, 254, 215, 171, 118],
-            [202, 130, 201, 125, 250, 89, 71, 240, 173, 212, 162, 175, 156, 164, 114, 192],
-            [183, 253, 147, 38, 54, 63, 247, 204, 52, 165, 229, 241, 113, 216, 49, 21],
-            [4, 199, 35, 195, 24, 150, 5, 154, 7, 18, 128, 226, 235, 39, 178, 117],
-            [9, 131, 44, 26, 27, 110, 90, 160, 82, 59, 214, 179, 41, 227, 47, 132],
-            [83, 209, 0, 237, 32, 252, 177, 91, 106, 203, 190, 57, 74, 76, 88, 207],
-            [208, 239, 170, 251, 67, 77, 51, 133, 69, 249, 2, 127, 80, 60, 159, 168],
-            [81, 163, 64, 143, 146, 157, 56, 245, 188, 182, 218, 33, 16, 255, 243, 210],
-            [205, 12, 19, 236, 95, 151, 68, 23, 196, 167, 126, 61, 100, 93, 25, 115],
-            [96, 129, 79, 220, 34, 42, 144, 136, 70, 238, 184, 20, 222, 94, 11, 219],
-            [224, 50, 58, 10, 73, 6, 36, 92, 194, 211, 172, 98, 145, 149, 228, 121],
-            [231, 200, 55, 109, 141, 213, 78, 169, 108, 86, 244, 234, 101, 122, 174, 8],
-            [186, 120, 37, 46, 28, 166, 180, 198, 232, 221, 116, 31, 75, 189, 139, 138],
-            [112, 62, 181, 102, 72, 3, 246, 14, 97, 53, 87, 185, 134, 193, 29, 158],
-            [225, 248, 152, 17, 105, 217, 142, 148, 155, 30, 135, 233, 206, 85, 40, 223],
-            [140, 161, 137, 13, 191, 230, 66, 104, 65, 153, 45, 15, 176, 84, 187, 22]])
-    aes = AESUtils(SBox)
+    ### Prédiction de l'état précédent le dernier round ###
+    aes = AESUtils()
+    # Création des hypothèses de clé
+    key_hypotheses = np.arange(0, 256, 1)   # Hypothèses de clés sur 8 bits
+
+    # Répétition de la matrice de cypher
+    try:
+        state_predict = np.load('processed_data/state_predict.npy')
+    except FileNotFoundError:
+        state_predict = np.zeros((key_hypotheses.size, cto.shape[0], cto.shape[1]), dtype=np.int32)
+        for i in range(256):
+            state_predict[i, :, :] = cto
+
+        print("Début du calcul de l'état initial")
+        t0 = time.time()
+        for trace in range(cto.shape[0]):
+            for key_i in key_hypotheses:
+                # AddRoundKey <=> xor
+                state_predict[key_i, trace, :] = aes.addRoundKey(state_predict[key_i, trace, :], key_i)
+                # shiftRow inverse
+                state_predict[key_i, trace, :] = aes.invShiftRow(state_predict[key_i, trace, :])
+                # SubByte inverse
+                state_predict[key_i, trace, :] = aes.invSubByte(state_predict[key_i, trace, :])
+            if trace % 100 == 0:
+                print("Prédiction terminée pour la trace n° {} - temps écoulé : {}".format(trace, round(time.time() - t0, 2)))
+
+        print("Prédiction terminée - temps total écoulé: ", time.time() - t0)
+        np.save('processed_data/state_predict.npy', state_predict)
+
+    print(state_predict)
